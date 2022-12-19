@@ -7,6 +7,7 @@ import {
   getPatchesInputFromURLSearch,
 } from "components/PatchesPage";
 import { DEFAULT_POLL_INTERVAL } from "constants/index";
+import { useCookieContext } from "context/cookie";
 import { useToastContext } from "context/toast";
 import {
   ProjectPatchesQuery,
@@ -21,6 +22,9 @@ const { parseQueryString } = queryString;
 
 export const ProjectPatches = () => {
   const dispatchToast = useToastContext();
+  const analyticsObject = useProjectPatchesAnalytics();
+
+  const { setRecentProjectCookie } = useCookieContext();
   const { id: projectId } = useParams<{ id: string }>();
   const { search } = useLocation();
   const parsed = parseQueryString(search);
@@ -37,7 +41,6 @@ export const ProjectPatches = () => {
       });
     }
   }, [parsed, updateQueryParams]);
-  const analyticsObject = useProjectPatchesAnalytics();
 
   const { data, refetch, startPolling, stopPolling, loading } = useQuery<
     ProjectPatchesQuery,
@@ -51,6 +54,9 @@ export const ProjectPatches = () => {
       },
     },
     pollInterval: DEFAULT_POLL_INTERVAL,
+    onCompleted: () => {
+      setRecentProjectCookie(projectId);
+    },
     onError: (err) => {
       dispatchToast.error(
         `Error while fetching project patches: ${err.message}`

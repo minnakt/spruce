@@ -1,11 +1,33 @@
-import { MockedProvider } from "@apollo/client/testing";
+import { MockedProvider, MockedResponse } from "@apollo/client/testing";
 import userEvent from "@testing-library/user-event";
 import { getCommitsRoute, getProjectSettingsRoute } from "constants/routes";
 import { RenderFakeToastContext } from "context/__mocks__/toast";
+import { CookieProvider } from "context/cookie";
 import { GET_PROJECTS, GET_VIEWABLE_PROJECTS } from "gql/queries";
 import { renderWithRouterMatch, screen, waitFor } from "test_utils";
-
 import { ProjectSelect } from ".";
+
+const ProjectSelectWrapper = ({
+  mocks = [],
+  selectedProjectIdentifier = "evergreen",
+  getRoute = () => "",
+  isProjectSettingsPage = false,
+}: {
+  mocks?: MockedResponse[];
+  selectedProjectIdentifier?: string;
+  getRoute?: (projectIdentifier: string) => string;
+  isProjectSettingsPage?: boolean;
+}) => (
+  <CookieProvider>
+    <MockedProvider mocks={mocks} addTypename={false}>
+      <ProjectSelect
+        selectedProjectIdentifier={selectedProjectIdentifier}
+        getRoute={getRoute}
+        isProjectSettingsPage={isProjectSettingsPage}
+      />
+    </MockedProvider>
+  </CookieProvider>
+);
 
 describe("projectSelect", () => {
   afterEach(() => {
@@ -15,12 +37,11 @@ describe("projectSelect", () => {
   describe("not project settings", () => {
     it("should show the project display name as the dropdown content", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getCommitsRoute}
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getCommitsRoute}
+        />
       );
       const { baseElement } = renderWithRouterMatch(<Component />);
       await waitFor(() => {
@@ -30,12 +51,11 @@ describe("projectSelect", () => {
 
     it("should narrow down search results when filtering on projects", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getCommitsRoute}
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getCommitsRoute}
+        />
       );
       renderWithRouterMatch(<Component />);
 
@@ -58,12 +78,11 @@ describe("projectSelect", () => {
 
     it("should be possible to search for projects by a repo name, which should NOT be clickable", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getCommitsRoute}
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getCommitsRoute}
+        />
       );
       renderWithRouterMatch(<Component />);
 
@@ -92,13 +111,12 @@ describe("projectSelect", () => {
   describe("project settings", () => {
     it("should show the project display name as the dropdown content", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getViewableProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getProjectSettingsRoute}
-            isProjectSettingsPage
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getViewableProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getProjectSettingsRoute}
+          isProjectSettingsPage
+        />
       );
       const { baseElement } = renderWithRouterMatch(<Component />);
       await waitFor(() => {
@@ -108,13 +126,12 @@ describe("projectSelect", () => {
 
     it("should narrow down search results when filtering on projects", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getViewableProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getProjectSettingsRoute}
-            isProjectSettingsPage
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getViewableProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getProjectSettingsRoute}
+          isProjectSettingsPage
+        />
       );
       renderWithRouterMatch(<Component />);
 
@@ -137,13 +154,12 @@ describe("projectSelect", () => {
 
     it("should be possible to search for projects by a repo name, which should be clickable", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getViewableProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getProjectSettingsRoute}
-            isProjectSettingsPage
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getViewableProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getProjectSettingsRoute}
+          isProjectSettingsPage
+        />
       );
       renderWithRouterMatch(<Component />);
 
@@ -170,13 +186,12 @@ describe("projectSelect", () => {
 
     it("shows favorited projects twice", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getViewableProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getProjectSettingsRoute}
-            isProjectSettingsPage
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getViewableProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getProjectSettingsRoute}
+          isProjectSettingsPage
+        />
       );
       renderWithRouterMatch(<Component />);
 
@@ -192,13 +207,12 @@ describe("projectSelect", () => {
 
     it("shows disabled projects at the bottom of the list", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={getViewableProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="evergreen"
-            getRoute={getProjectSettingsRoute}
-            isProjectSettingsPage
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={getViewableProjectsMock}
+          selectedProjectIdentifier="evergreen"
+          getRoute={getProjectSettingsRoute}
+          isProjectSettingsPage
+        />
       );
       renderWithRouterMatch(<Component />);
 
@@ -218,13 +232,12 @@ describe("projectSelect", () => {
 
     it("does not show a heading for disabled projects when all projects are enabled", async () => {
       const { Component } = RenderFakeToastContext(
-        <MockedProvider mocks={noDisabledProjectsMock} addTypename={false}>
-          <ProjectSelect
-            selectedProjectIdentifier="spruce"
-            getRoute={getProjectSettingsRoute}
-            isProjectSettingsPage
-          />
-        </MockedProvider>
+        <ProjectSelectWrapper
+          mocks={noDisabledProjectsMock}
+          selectedProjectIdentifier="spruce"
+          getRoute={getProjectSettingsRoute}
+          isProjectSettingsPage
+        />
       );
       renderWithRouterMatch(<Component />);
 

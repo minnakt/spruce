@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import styled from "@emotion/styled";
-import Cookies from "js-cookie";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useProjectHealthAnalytics } from "analytics/projectHealth/useProjectHealthAnalytics";
 import FilterBadges, {
@@ -12,11 +11,11 @@ import { PageWrapper } from "components/styles";
 import { ALL_VALUE } from "components/TreeSelect";
 import TupleSelect from "components/TupleSelect";
 import WelcomeModal from "components/WelcomeModal";
-import { CURRENT_PROJECT } from "constants/cookies";
 import { DEFAULT_POLL_INTERVAL } from "constants/index";
 import { getCommitsRoute } from "constants/routes";
 import { size } from "constants/tokens";
 import { newMainlineCommitsUser } from "constants/welcomeModalProps";
+import { useCookieContext } from "context/cookie";
 import { useToastContext } from "context/toast";
 import {
   GetSpruceConfigQuery,
@@ -61,19 +60,21 @@ export const Commits = () => {
   // get query params from url
   const { id: projectId } = useParams<{ id: string }>();
   usePageTitle(`Project Health | ${projectId}`);
-  const recentlySelectedProject = Cookies.get(CURRENT_PROJECT);
+
+  const { recentProjectCookie, setRecentProjectCookie } = useCookieContext();
+
   // Push default project to URL if there isn't a project in
   // the URL already and an mci-project-cookie does not exist.
   const { data: spruceData } = useQuery<
     GetSpruceConfigQuery,
     GetSpruceConfigQueryVariables
   >(GET_SPRUCE_CONFIG, {
-    skip: !!projectId || !!recentlySelectedProject,
+    skip: !!projectId || !!recentProjectCookie,
   });
   useEffect(() => {
     if (!projectId) {
-      if (recentlySelectedProject) {
-        navigate(getCommitsRoute(recentlySelectedProject), { replace: true });
+      if (recentProjectCookie) {
+        navigate(getCommitsRoute(recentProjectCookie), { replace: true });
       } else if (spruceData) {
         navigate(getCommitsRoute(spruceData?.spruceConfig.ui.defaultProject), {
           replace: true,
@@ -117,6 +118,9 @@ export const Commits = () => {
     skip: !projectId,
     variables,
     pollInterval: DEFAULT_POLL_INTERVAL,
+    onCompleted: () => {
+      setRecentProjectCookie(projectId);
+    },
     onError: (e) =>
       dispatchToast.error(`There was an error loading the page: ${e.message}`),
   });
