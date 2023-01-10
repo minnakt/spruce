@@ -237,7 +237,7 @@ export const getFormSchema = ({
       "ui:allowDeselect": false,
       "ui:disabled": volumes.length === 0,
       "ui:placeholder":
-        volumes.length === 0 ? "No Volumes Available" : undefined,
+        volumes.length === 0 ? "No volumes available" : undefined,
     },
     rdpPassword: {
       // Console error should be resolved by https://jira.mongodb.org/browse/LG-2342.
@@ -266,7 +266,8 @@ export const getFormSchema = ({
         "ui:disabled": !canEditSshKeys,
       },
       publicKeyNameDropdown: {
-        "ui:valuePlaceholder": "Select a key",
+        "ui:placeholder":
+          myPublicKeys?.length > 0 ? "Select a key" : "No keys available",
         "ui:disabled": !canEditSshKeys,
       },
       newPublicKey: {

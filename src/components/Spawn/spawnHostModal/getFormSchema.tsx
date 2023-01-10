@@ -526,7 +526,7 @@ export const getFormSchema = ({
             "ui:disabled": availableVolumes?.length === 0,
             "ui:placeholder":
               availableVolumes?.length === 0
-                ? "No Volumes Available"
+                ? "No volumes available"
                 : undefined,
             "ui:enumDisabled": (volumes || [])
               .filter((v) => !!v.hostID)
